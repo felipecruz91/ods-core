@@ -1,0 +1,62 @@
+{
+    "variables": {
+        "centos_version": "CentOS-7-x86_64-DVD-2003.iso",
+        "centos_iso_location": "",
+        "centos_iso_sha": "087a5743dc6fd6706d9b961b8147423ddc029451b938364c760d75440eb7be14",
+        "ssh_username": "root",
+        "ssh_password": ""
+    },
+    "builders": [
+        {
+            "type": "virtualbox-iso",
+            "http_directory": "ods-devenv/packer",
+            "boot_command": [
+                "<tab><wait>",
+                " ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/kickstart.cfg<enter>"
+            ],
+            "disk_size": 100000,
+            "cpus": 4,
+            "memory": 8192,
+            "iso_url": "{{user `centos_iso_location`}}",
+            "iso_checksum": "{{user `centos_iso_sha`}}",
+            "ssh_username": "{{user `ssh_username`}}",
+            "ssh_password": "{{user `ssh_password`}}",
+            "shutdown_command": "echo openshift | sudo -S shutdown --poweroff now",
+            "ssh_timeout": "30m"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "inline": [
+                "whoami",
+                "pwd",
+                "mkdir -p bin",
+                "mkdir -p tmp",
+                "touch bin/bootstrap",
+                "chmod u+x bin/bootstrap"
+            ]
+        },
+        {
+            "type": "file",
+            "source": "ods-devenv/scripts/bootstrap.sh",
+            "destination": "/home/openshift/bin/bootstrap"
+        }
+    ],
+    "post-processors": [
+        [
+            {
+                "type": "artifice",
+                "files": [
+                    "output-virtualbox-iso/vbox-example-disk001.vmdk",
+                    "output-virtualbox-iso/vbox-example.ovf"
+                ]
+            },
+            {
+                "type": "vagrant",
+                "keep_input_artifact": true,
+                "provider_override": "virtualbox"
+            }
+        ]
+    ]
+}
