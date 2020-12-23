@@ -1,0 +1,66 @@
+{
+    "variables": {
+        "output_path": "./output"
+    },
+    "builders": [
+        {
+            "communicator": "ssh",
+            "ssh_port": 22,
+            "ssh_username": "openshift",
+            "ssh_password": "openshift",
+            "source_path": "builds/virtualbox-centos7.box",
+            "provider": "virtualbox",
+            "add_force": true,
+            "type": "vagrant",
+            "template": "template/Vagrantfile",
+            "output_dir": "{{user `output_path`}}/vagrant"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "file",
+            "source": "ods-devenv/ods-service/startup_ods.sh",
+            "destination": "/home/openshift/tmp/"
+        },
+        {
+            "type": "file",
+            "source": "ods-devenv/ods-service/stop_ods.sh",
+            "destination": "/home/openshift/tmp/"
+        },
+        {
+            "type": "file",
+            "source": "ods-devenv/ods-service/ods.service",
+            "destination": "/home/openshift/tmp/"
+        },
+        {
+            "type": "shell",
+            "script": "ods-devenv/packer/pwd_less_sudo.sh",
+            "execute_command": "echo openshift | sudo -S bash -c '{{ .Path }}'"
+        },
+        {
+            "type": "shell",
+            "script": "ods-devenv/scripts/bootstrap.sh",
+            "execute_command": "{{ .Path }}  --branch master"
+        },
+        {
+            "type": "shell",
+            "script": "ods-devenv/packer/stop_ods.sh"
+        },
+        {
+            "type": "shell",
+            "script": "ods-devenv/packer/pwd_sudo.sh",
+            "execute_command": "echo openshift | sudo -S bash -c '{{ .Path }}'"
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo Installing ODS service",
+                "echo openshift | sudo -S cp /home/openshift/tmp/ods.service /etc/systemd/system/ods.service",
+                "sudo cp /home/openshift/tmp/startup_ods.sh /usr/local/sbin/startup_ods.sh",
+                "sudo cp /home/openshift/tmp/stop_ods.sh /usr/local/sbin/stop_ods.sh",
+                "sudo systemctl daemon-reload",
+                "sudo systemctl enable --now ods.service"
+            ]
+        }
+    ]
+}

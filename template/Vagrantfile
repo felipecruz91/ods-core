@@ -1,0 +1,18 @@
+Vagrant.configure("2") do |config|
+  config.vm.define "source", autostart: false do |source|
+	source.vm.box = "builds/virtualbox-centos7.box"
+	config.ssh.insert_key = false
+  config.ssh.username = 'openshift'
+  config.ssh.password = 'openshift'
+
+  config.vm.network "public_network", bridge: 'Intel(R) Wireless-AC 9560 160MHz'
+
+  end
+
+  config.vm.define "output" do |output|
+	output.vm.box = "packer_vagrant"
+	output.vm.box_url = "file://package.box"
+	config.ssh.insert_key = false
+  end
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+end
