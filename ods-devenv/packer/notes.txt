@@ -1,5 +1,6 @@
 packer build --force -on-error=ask -var 'version=1.2.0' ./ods-devenv/packer/CentOS_BaseImage_VirtualBox.json
 
-set PACKER_LOG=1
+
 # packer build -on-error=ask -var 'username=openshift' -var 'password=openshift' -var 'ods_branch=master' ./ods-devenv/packer/CentOS2ODSBoxVagrant.json
+set PACKER_LOG=1
 packer build -on-error=ask ./ods-devenv/packer/CentOS2ODSBoxVagrant.json

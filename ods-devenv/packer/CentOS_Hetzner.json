@@ -1,0 +1,44 @@
+{
+    "variables": {
+        "hcloud-token": "{{ env `HCLOUD_TOKEN` }}",
+        "hcloud-servertype": "cx21"
+    },
+    "builders": [
+        {
+            "type": "hcloud",
+            "name": "{{ uuid }}",
+            "ssh_username": "root",
+            "ssh_keys": [
+                "~/.ssh/id_rsa.pub"
+            ],
+            "token": "{{ user `hcloud-token` }}",
+            "server_type": "{{ user `hcloud-servertype` }}",
+            "location": "ngb1",
+            "image": "centos-7",
+            "snapshot_name": "centos7-{{ timestamp }}",
+            "snapshot_labels": {
+                "packer.io/version": "{{ packer_version }}",
+                "packer.io/build.id": "{{ build_name }}",
+                "packer.io/build.time": "{{ timestamp }}"
+            }
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "inline": [
+                "whoami",
+                "pwd",
+                "mkdir -p bin",
+                "mkdir -p tmp",
+                "touch bin/bootstrap",
+                "chmod u+x bin/bootstrap"
+            ]
+        },
+        {
+            "type": "file",
+            "source": "ods-devenv/scripts/bootstrap.sh",
+            "destination": "/home/openshift/bin/bootstrap"
+        }
+    ]
+}
