@@ -1902,9 +1902,7 @@ function basic_vm_setup() {
 
     setup_jenkins_agents
 
-    # TODO: Fix
-    echo "[!!!!!!!!!!] SKIP SMOKE TESTS [!!!!!!!!!!]"
-    # run_smoke_tests
+    run_smoke_tests
     setup_ods_crontab
 
     echo "Installation completed."

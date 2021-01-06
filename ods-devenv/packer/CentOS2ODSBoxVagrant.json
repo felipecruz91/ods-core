@@ -1,6 +1,10 @@
 {
     "variables": {
-        "output_path": "./output"
+        "output_path": "./output",
+        "cloud_token": "{{ env `VAGRANT_CLOUD_TOKEN` }}",
+        "cloud_user": "felipecruz",
+        "cloud_box_name": "test",
+        "version": "0.0.1"
     },
     "builders": [
         {
@@ -62,5 +66,13 @@
                 "sudo systemctl enable --now ods.service"
             ]
         }
+    ],
+    "post-processors": [
+        [
+            {
+                "type": "vagrant",
+                "output": "builds/{{.Provider}}-odsbox.box"
+            }
+        ]
     ]
 }

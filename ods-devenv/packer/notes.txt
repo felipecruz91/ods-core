@@ -4,3 +4,24 @@ packer build --force -on-error=ask -var 'version=1.2.0' ./ods-devenv/packer/Cent
 # packer build -on-error=ask -var 'username=openshift' -var 'password=openshift' -var 'ods_branch=master' ./ods-devenv/packer/CentOS2ODSBoxVagrant.json
 set PACKER_LOG=1
 packer build -on-error=ask ./ods-devenv/packer/CentOS2ODSBoxVagrant.json
+
+
+,
+    "post-processors": [
+        [
+            {
+                "type": "vagrant",
+                "output": "builds/{{.Provider}}-odsbox.box"
+            },
+            {
+                "type": "vagrant-cloud",
+                "box_tag": "{{ `cloud_user`}}/{{ `cloud_box_name`}}",
+                "access_token": "{{user `cloud_token`}}",
+                "version": "{{user `version`}}"
+            }
+        ]
+    ]
+    
+set VAGRANT_CLOUD_TOKEN=<VAGRANT_CLOUD_TOKEN>
+packer build -on-error=ask -var 'cloud_user=felipecruz' -var 'cloud_box_name=test' -var 'version=0.0.1' ./ods-devenv/packer/CentOS2ODSBoxVagrant.json
+
