@@ -34,4 +34,6 @@ cd ods-core
 sed -i 's/sleep 3/sleep 600/' ./ocp-scripts/start-and-follow-build.sh
 sed -i 's/    setup_docgen/    # setup_docgen/g' ./ods-devenv/scripts/deploy.sh
 sed -i 's/    run_smoke_tests/    # run_smoke_tests/' ./ods-devenv/scripts/deploy.sh
+sed -i 's/\/usr\/local\/sbin\/startup_ods.sh/\/bin\/bash \/usr\/local\/sbin\/startup_ods.sh/' ./ods-devenv/ods-service/ods.service
+sed -i 's/\/usr\/local\/sbin\/stop_ods.sh/\/bin\/bash \/usr\/local\/sbin\/stop_ods.sh/' ./ods-devenv/ods-service/ods.service
 time bash ods-devenv/scripts/deploy.sh --branch "${ods_git_ref}" --target basic_vm_setup
