@@ -14,7 +14,7 @@ ods_git_ref="${ods_git_ref:-master}"
 echo "bootstrap: Will build ods box against git-ref ${ods_git_ref}"
 
 #TODO: Fix
-sudo route del default gw 0.0.0.0
+#sudo route del default gw 0.0.0.0
 
 # install modern git version as required by repos.sh
 if [[ -n $(command -v git) ]]; then sudo yum remove -y git*; fi
@@ -31,9 +31,9 @@ chmod u+x ./repos.sh
 ./repos.sh --git-ref "${ods_git_ref}" --verbose
 
 cd ods-core
-sed -i 's/sleep 3/sleep 600/' ./ocp-scripts/start-and-follow-build.sh
-sed -i 's/    setup_docgen/    # setup_docgen/g' ./ods-devenv/scripts/deploy.sh
-sed -i 's/    run_smoke_tests/    # run_smoke_tests/' ./ods-devenv/scripts/deploy.sh
+#sed -i 's/sleep 3/sleep 600/' ./ocp-scripts/start-and-follow-build.sh
+#sed -i 's/    setup_docgen/    # setup_docgen/g' ./ods-devenv/scripts/deploy.sh
+#sed -i 's/    run_smoke_tests/    # run_smoke_tests/' ./ods-devenv/scripts/deploy.sh
 sed -i 's/\/usr\/local\/sbin\/startup_ods.sh/\/bin\/bash \/usr\/local\/sbin\/startup_ods.sh/' ./ods-devenv/ods-service/ods.service
 sed -i 's/\/usr\/local\/sbin\/stop_ods.sh/\/bin\/bash \/usr\/local\/sbin\/stop_ods.sh/' ./ods-devenv/ods-service/ods.service
 time bash ods-devenv/scripts/deploy.sh --branch "${ods_git_ref}" --target basic_vm_setup
