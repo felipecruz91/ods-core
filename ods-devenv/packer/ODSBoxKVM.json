@@ -1,0 +1,113 @@
+{
+    "builders": [
+        {
+            "type": "qemu",
+            "accelerator": "kvm",
+            "headless": true,
+            "qemuargs": [
+                [
+                    "-m",
+                    "2048M"
+                ],
+                [
+                    "-smp",
+                    "cpus=1,maxcpus=16,cores=4"
+                ]
+            ],
+            "disk_interface": "virtio",
+            "disk_size": 100000,
+            "format": "qcow2",
+            "net_device": "virtio-net",
+            "iso_url": "CentOS-7-x86_64-DVD-2003.iso",
+            "iso_checksum": "sha256:087a5743dc6fd6706d9b961b8147423ddc029451b938364c760d75440eb7be14",
+            "vm_name": "centos7-ods",
+            "output_directory": "centos7-ods-img",
+            "http_directory": "ods-devenv/packer",
+            "http_port_min": 10082,
+            "http_port_max": 10089,
+            "ssh_host_port_min": 2222,
+            "ssh_host_port_max": 2229,
+            "ssh_username": "openshift",
+            "ssh_password": "openshift",
+            "ssh_port": 22,
+            "ssh_wait_timeout": "30m",
+            "boot_wait": "40s",
+            "boot_command": [
+                "<tab><wait>",
+                " ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/kickstart.cfg<enter>"
+            ],
+            "shutdown_command": "echo openshift | sudo -S shutdown --poweroff now"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "inline": [
+                "whoami",
+                "pwd",
+                "mkdir -p bin",
+                "mkdir -p tmp",
+                "touch bin/bootstrap",
+                "chmod u+x bin/bootstrap"
+            ]
+        },
+        {
+            "type": "file",
+            "source": "ods-devenv/scripts/bootstrap.sh",
+            "destination": "/home/openshift/bin/bootstrap"
+        },
+        {
+            "type": "file",
+            "source": "ods-devenv/ods-service/startup_ods.sh",
+            "destination": "/home/openshift/tmp/"
+        },
+        {
+            "type": "file",
+            "source": "ods-devenv/ods-service/stop_ods.sh",
+            "destination": "/home/openshift/tmp/"
+        },
+        {
+            "type": "file",
+            "source": "ods-devenv/ods-service/ods.service",
+            "destination": "/home/openshift/tmp/"
+        },
+        {
+            "type": "shell",
+            "script": "ods-devenv/packer/pwd_less_sudo.sh",
+            "execute_command": "echo openshift | sudo -S bash -c '{{ .Path }}'"
+        },
+        {
+            "type": "shell",
+            "script": "ods-devenv/scripts/bootstrap.sh",
+            "execute_command": "{{ .Path }}  --branch master"
+        },
+        {
+            "type": "shell",
+            "script": "ods-devenv/packer/stop_ods.sh"
+        },
+        {
+            "type": "shell",
+            "script": "ods-devenv/packer/pwd_sudo.sh",
+            "execute_command": "echo openshift | sudo -S bash -c '{{ .Path }}'"
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo Installing ODS service",
+                "echo openshift | sudo -S cp /home/openshift/tmp/ods.service /etc/systemd/system/ods.service",
+                "sudo cp /home/openshift/tmp/startup_ods.sh /usr/local/sbin/startup_ods.sh",
+                "sudo cp /home/openshift/tmp/stop_ods.sh /usr/local/sbin/stop_ods.sh",
+                "sudo systemctl daemon-reload",
+                "sudo systemctl enable --now ods.service"
+            ]
+        }
+    ],
+    "post-processors": [
+        [
+            {
+                "type": "vagrant",
+                "output": "builds/{{.Provider}}-centos7-ods.box"
+            }
+        ]
+    ]
+}
