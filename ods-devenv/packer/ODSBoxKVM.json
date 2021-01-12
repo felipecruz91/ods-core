@@ -3,7 +3,7 @@
         {
             "type": "qemu",
             "accelerator": "kvm",
-            "headless": true,
+            "headless": false,
             "qemuargs": [
                 [
                     "-m",
@@ -30,7 +30,7 @@
             "ssh_username": "openshift",
             "ssh_password": "openshift",
             "ssh_port": 22,
-            "ssh_wait_timeout": "30m",
+            "ssh_wait_timeout": "3h",
             "boot_wait": "40s",
             "boot_command": [
                 "<tab><wait>",
